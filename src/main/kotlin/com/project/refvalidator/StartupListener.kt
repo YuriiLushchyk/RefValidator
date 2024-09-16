@@ -2,6 +2,7 @@ package com.project.refvalidator
 
 import com.project.refvalidator.service.BlobReferencesService
 import com.project.refvalidator.service.BlobReferencesValidator
+import com.project.refvalidator.util.splitRange
 import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Component
@@ -13,7 +14,7 @@ class StartupListener(val validator: BlobReferencesValidator,
 
     @EventListener(ApplicationReadyEvent::class)
     fun onApplicationReady() {
-        val blobIdRanges = blobReferencesService.getBlobIdRanges()
+        val blobIdRanges = blobReferencesService.getBlobIdRanges().splitRange()
         val featureList = mutableListOf<CompletableFuture<List<String>>>()
 
         blobIdRanges.forEach { featureList.add(validator.asyncValidateReferencesForBlobsIn(it)) }

@@ -1,11 +1,11 @@
 package com.project.refvalidator.util
 
 
-fun splitRange(min: Long, max: Long): List<Pair<Long, Long>> {
+fun Pair<Long, Long>.splitRange(): List<Pair<Long, Long>> {
     val ranges = mutableListOf<Pair<Long, Long>>()
-    var start = min
-    while (start <= max) {
-        val end = (start + BATCH_SIZE - 1).coerceAtMost(max)
+    var start = first
+    while (start <= second) {
+        val end = (start + BATCH_SIZE - 1).coerceAtMost(second)
         ranges.add(Pair(start, end))
         start = end + 1
     }
