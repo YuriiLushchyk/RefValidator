@@ -2,7 +2,6 @@ package com.project.refvalidator
 
 import com.project.refvalidator.service.BlobReferencesService
 import com.project.refvalidator.service.BlobReferencesValidator
-import com.project.refvalidator.util.splitRange
 import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Component
@@ -14,7 +13,7 @@ class StartupListener(val validator: BlobReferencesValidator,
 
     @EventListener(ApplicationReadyEvent::class)
     fun onApplicationReady() {
-        val blobIdRanges = blobReferencesService.getBlobIdRange().splitRange()
+        val blobIdRanges = blobReferencesService.getBlobIdRange().splitRange(MAX_BATCH_SIZE)
         val featureList = mutableListOf<CompletableFuture<List<String>>>()
 
         blobIdRanges.forEach { featureList.add(validator.asyncValidateReferencesForBlobsIn(it)) }
@@ -28,6 +27,22 @@ class StartupListener(val validator: BlobReferencesValidator,
                 println("Not good, here are errors:")
                 errors.forEach { println(it) }
             }
+        }
+    }
+
+
+    companion object {
+        private const val MAX_BATCH_SIZE = 1000
+
+        fun Pair<Long, Long>.splitRange(maxBatchSize: Int): List<Pair<Long, Long>> {
+            val ranges = mutableListOf<Pair<Long, Long>>()
+            var start = first
+            while (start <= second) {
+                val end = (start + maxBatchSize - 1).coerceAtMost(second)
+                ranges.add(Pair(start, end))
+                start = end + 1
+            }
+            return ranges
         }
     }
 
