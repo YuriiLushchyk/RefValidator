@@ -1,5 +1,8 @@
 package com.project.refvalidator.service
 
+import com.project.refvalidator.model.Blob
+import com.project.refvalidator.model.ReferenceLocation
+import com.project.refvalidator.model.ReferencesSource
 import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
@@ -33,9 +36,27 @@ class BlobReferencesServiceTest {
         mockRangeQuery(shardTemplate, "SELECT MIN(Body) AS minId, MAX(Body) AS maxId \nFROM MessageData", null, null)
         mockRangeQuery(shardTemplate, "SELECT MIN(Header) AS minId, MAX(Header) AS maxId \nFROM MessageData", 40, 700)
         mockRangeQuery(globalTemplate, "SELECT MIN(BlobStorageID) AS minId, MAX(BlobStorageID) AS maxId \nFROM BlobStorage", 700, 750)
-        val result = service.getBlobIdRanges()
-        assertEquals(4,result.first)
-        assertEquals(1001,result.second)
+        val result = service.getBlobIdRange()
+        assertEquals(4, result.first)
+        assertEquals(1001, result.second)
+    }
+
+    @Test
+    fun `Giving blobs referred in table getBlobsReferredIn`() {
+        val idRange = 11L to 111L
+        val blobsList = listOf(
+                Blob(11L, 1),
+                Blob(15L, 2)
+        )
+        every {
+            globalTemplate.query(eq("SELECT column as BlobStorageID, count(*) as NumReferences\n" +
+                    "FROM table\n" +
+                    "WHERE column >= 11 AND column <= 111\n" +
+                    "GROUP BY column"), any<Blob.Mapper>())
+        } returns blobsList
+        val source = ReferencesSource(globalTemplate, ReferenceLocation("database", "table", "column"))
+        val result = service.getBlobsReferredIn(idRange, source)
+        assertEquals(blobsList, result)
     }
 
 

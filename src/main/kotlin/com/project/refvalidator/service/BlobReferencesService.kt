@@ -10,14 +10,23 @@ import org.springframework.stereotype.Service
 @Service
 class BlobReferencesService(val globalTemplate: JdbcTemplate, val shardTemplate: JdbcTemplate) {
 
-    fun getBlobIdRanges(): Pair<Long, Long> {
+    fun getBlobIdRange(): Pair<Long, Long> {
         val allSources = getReferringDataSources() + ReferencesSource(globalTemplate, globalBlobsSource)
         val rangesOfSource = allSources
-                .map { source -> getBlobIdRanges(source) }
+                .map { source -> getBlobIdRange(source) }
                 .filter { range -> range.first != null && range.second != null }
                 .map { range -> range.first!! to range.second!! }
 
         return rangesOfSource.minOf { it.first } to rangesOfSource.maxOf { it.second }
+    }
+
+    private fun getBlobIdRange(source: ReferencesSource): Pair<Long?, Long?> {
+        val result = source.template.queryForRowSet("""
+            SELECT MIN(${source.references.column}) AS minId, MAX(${source.references.column}) AS maxId 
+            FROM ${source.references.table}
+        """.trimIndent())
+        result.next()
+        return result.getNullableLong("minId") to result.getNullableLong("maxId")
     }
 
     fun getBlobsFromStorageIn(range: Pair<Long, Long>): List<Blob> {
@@ -39,15 +48,6 @@ class BlobReferencesService(val globalTemplate: JdbcTemplate, val shardTemplate:
             """.trimIndent()
             template.query(query, Blob.Mapper())
         }
-    }
-
-    private fun getBlobIdRanges(source: ReferencesSource): Pair<Long?, Long?> {
-        val result = source.template.queryForRowSet("""
-            SELECT MIN(${source.references.column}) AS minId, MAX(${source.references.column}) AS maxId 
-            FROM ${source.references.table}
-        """.trimIndent())
-        result.next()
-        return result.getNullableLong("minId") to result.getNullableLong("maxId")
     }
 
     fun SqlRowSet.getNullableLong(name: String): Long? {

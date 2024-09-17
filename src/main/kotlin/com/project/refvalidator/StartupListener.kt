@@ -14,7 +14,7 @@ class StartupListener(val validator: BlobReferencesValidator,
 
     @EventListener(ApplicationReadyEvent::class)
     fun onApplicationReady() {
-        val blobIdRanges = blobReferencesService.getBlobIdRanges().splitRange()
+        val blobIdRanges = blobReferencesService.getBlobIdRange().splitRange()
         val featureList = mutableListOf<CompletableFuture<List<String>>>()
 
         blobIdRanges.forEach { featureList.add(validator.asyncValidateReferencesForBlobsIn(it)) }
