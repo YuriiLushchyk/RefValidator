@@ -94,6 +94,7 @@ needs to be scaled).
 * _test.kotlin_ contains Unit tests only for critical parts of the solution.
 
 **Please note** I will add comments to important parts of code.
+To execute validation we need to run ```./gradlew bootRun``` but both databases should be running locally (look inside _DataSourceConfig_ file)
 
 ## Possible Solutions
 
