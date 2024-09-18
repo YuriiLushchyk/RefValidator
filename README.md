@@ -96,6 +96,10 @@ needs to be scaled).
 **Please note** I will add comments to important parts of code.
 To execute validation we need to run ```./gradlew bootRun``` but both databases should be running locally (look inside _DataSourceConfig_ file)
 
+## RESULT
+
+### **Databases provided with task don't have any discrepancies with numReferences of Blobs**
+
 ## Possible Solutions
 
 * If blobId wasn't Long but, for example, random String I would go with similar General Idea but
