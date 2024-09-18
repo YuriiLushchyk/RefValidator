@@ -46,9 +46,13 @@ asynchronously.
 
 * Two different sources of data.
 * _Efficiency_, _Speed_ and _Scaling_ considerations force to write checks in batches.
-* **Important**: _Resiliency_ in this case makes me think that write operation are being performed to 
-the database all the time. So false-positive results are always possible without locking all the tables (or taking a snapshot of DB).
-So after analysis, I decided to focus on one time check anyway. This check can be performed several times to get consistent results before performing persistent actions. Please take a look at **Possible Solutions** for other ideas.
+* **Important**: _Resiliency_ in this case makes me think that write operation are being performed
+  to
+  the database all the time. So false-positive results are always possible without locking all the
+  tables (or taking a snapshot of DB).
+  So after analysis, I decided to focus on one time check anyway. This check can be performed
+  several times to get consistent results before performing persistent actions. Please take a look
+  at **Possible Solutions** for other ideas.
 * In this specific task blobId is incremental Long.
 
 ## Solution idea
@@ -83,16 +87,22 @@ needs to be scaled).
 
 * _StartupListener_. Solution entry point on app start-up (after DBs connected and ect.)
 * _DataSourceConfig_. Configuration of both datasources.
-* _BlobReferencesService_. Service that provides data access to both databases. For simplicity there is only one such service and no Repo level.
-In general, if solution is more complex it would have more layers.
+* _BlobReferencesService_. Service that provides data access to both databases. For simplicity there
+  is only one such service and no Repo level.
+  In general, if solution is more complex it would have more layers.
 * _BlobReferencesValidator_. This component encapsulates validation logic and error reporting.
 * _test.kotlin_ contains Unit tests only for critical parts of the solution.
 
-**Please note** I will add simple comments to important parts of code. 
-
+**Please note** I will add simple comments to important parts of code.
 
 ## Possible Solutions
-* If blobId wasn't Long but, for example, random String I would go with similar General Idea but used some sort of key-value external storage to make snapshots of blob->numReferences.
-Later after taking both snapshots I would compare them in batches. This solution requires more complex infrastructure.
-* If _Resiliency_ indeed means not to allow false-positivity in check I think one time check is not right solution. And consistent checking should be implemented, closer to the place where blobs are created/referred.
-Possibly on application level or with DB callbacks. This requires more info about blob creation mechanism (delays in updation counter etc).
+
+* If blobId wasn't Long but, for example, random String I would go with similar General Idea but
+  used some sort of key-value external storage to make snapshots of blob->numReferences.
+  Later after taking both snapshots I would compare them in batches. This solution requires more
+  complex infrastructure.
+* If _Resiliency_ indeed means not to allow false-positivity in check I think one time check is not
+  right solution. And consistent checking should be implemented, closer to the place where blobs are
+  created/referred.
+  Possibly on application level or with DB callbacks. This requires more info about blob creation
+  mechanism (delays in updation counter etc).
