@@ -10,6 +10,9 @@ import org.springframework.stereotype.Service
 @Service
 class BlobReferencesService(val globalTemplate: JdbcTemplate, val shardTemplate: JdbcTemplate) {
 
+    /**
+     * We search for min and max ids in all sources. Not only BlobStorage.
+     */
     fun getBlobIdRange(): Pair<Long, Long> {
         val allSources = getReferringDataSources() + ReferencesSource(globalTemplate, globalBlobsSource)
         val rangesOfSource = allSources

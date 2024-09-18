@@ -14,9 +14,9 @@ class StartupListener(val validator: BlobReferencesValidator,
     @EventListener(ApplicationReadyEvent::class)
     fun onApplicationReady() {
         val blobIdRanges = blobReferencesService.getBlobIdRange().splitRange(MAX_BATCH_SIZE)
-        val featureList = mutableListOf<CompletableFuture<List<String>>>()
+        val featureList = mutableListOf<CompletableFuture<List<String>>>() //features allowing us to collect errors from different threads
 
-        blobIdRanges.forEach { featureList.add(validator.asyncValidateReferencesForBlobsIn(it)) }
+        blobIdRanges.forEach { featureList.add(validator.asyncValidateReferencesForBlobsIn(it)) } // run each batch in parallel
 
         CompletableFuture.allOf(*featureList.toTypedArray()).thenRun {
             val errors = mutableListOf<String>()

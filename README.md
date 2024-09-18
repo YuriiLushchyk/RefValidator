@@ -93,7 +93,7 @@ needs to be scaled).
 * _BlobReferencesValidator_. This component encapsulates validation logic and error reporting.
 * _test.kotlin_ contains Unit tests only for critical parts of the solution.
 
-**Please note** I will add simple comments to important parts of code.
+**Please note** I will add comments to important parts of code.
 
 ## Possible Solutions
 

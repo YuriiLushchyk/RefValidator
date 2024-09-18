@@ -16,16 +16,16 @@ class BlobReferencesValidator(val blobReferencesService: BlobReferencesService) 
         val blobsFromStorage = blobReferencesService.getBlobsFromStorageIn(idRange)
         println("now = ${System.currentTimeMillis()} ,thread = ${Thread.currentThread().id}, idRange = $idRange, batch size ${blobsFromStorage.size}")
 
-        val auditMap = transformToAuditMap(blobsFromStorage)
+        val auditMap = transformToAuditMap(blobsFromStorage) // structure for easy access
         val referringDataSources = blobReferencesService.getReferringDataSources()
 
         val results = mutableListOf<String>()
 
         referringDataSources.forEach {
-            results.addAll(auditSource(idRange, it, auditMap))
+            results.addAll(auditSource(idRange, it, auditMap)) // review each data source
         }
 
-        results.addAll(finalCheck(auditMap))
+        results.addAll(finalCheck(auditMap))//finally auditMap will have evidences of mismatching numReferences
 
         return CompletableFuture.completedFuture(results)
     }
@@ -36,7 +36,7 @@ class BlobReferencesValidator(val blobReferencesService: BlobReferencesService) 
             if (blobRecord.value.isNumReferencesInvalid()) {
                 result.add("Found blob with invalid NumReferences, " +
                         "BlobStorageID = ${blobRecord.key}, expected NumReferences = ${blobRecord.value.expectedNumReferences}, but was actually referred ${blobRecord.value.actualNumReferences} times.")
-            }
+            }// when "actually referred = 0" means orphan blob with nonzero reference.
         }
         return result
     }
